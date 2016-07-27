@@ -1,5 +1,5 @@
 # aws-lambda-ebs-backups
-Python scripts to be run using AWS's Lambda service to Backup and Delete Snapshots of EBS Volumes
+Python scripts to be run using AWS's Lambda service to Create and Delete Snapshots of EBS Volumes
 
 Read my blog post for more details on setting this up in Lambda if you have not used it before (http://www.evergreenitco.com/evergreenit-blog/2016/4/19/aws-ebs-backup-job-run-by-lambda).
 
