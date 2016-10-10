@@ -21,7 +21,8 @@ def lambda_handler(event, context):
 
     print "Found %d instances that need backing up" % len(instances)
 
-    to_tag = collections.defaultdict(list)
+    to_tag_retention = collections.defaultdict(list)
+    to_tag_mount_point = collections.defaultdict(list)
 
     for instance in instances:
         try:
@@ -43,9 +44,10 @@ def lambda_handler(event, context):
                 VolumeId=vol_id,
                 Description=instance['InstanceId'],
             )
-                                    
-            to_tag[retention_days].append(snap['SnapshotId'])
-            
+
+            to_tag_retention[retention_days].append(snap['SnapshotId'])
+            to_tag_mount_point[vol_id].append(snap['SnapshotId'])
+
 
             print "Retaining snapshot %s of volume %s from instance %s for %d days" % (
                 snap['SnapshotId'],
@@ -55,20 +57,19 @@ def lambda_handler(event, context):
             )
 
             ec.create_tags(
-                Resources=to_tag[retention_days],
+                Resources=to_tag_mount_point[vol_id],
                 Tags=[
                     {'Key': 'Name', 'Value': dev_attachment},
                 ]
             )
 
-    for retention_days in to_tag.keys():
+    for retention_days in to_tag_retention.keys():
         delete_date = datetime.date.today() + datetime.timedelta(days=retention_days)
         delete_fmt = delete_date.strftime('%Y-%m-%d')
-        print "Will delete %d snapshots on %s" % (len(to_tag[retention_days]), delete_fmt)
+        print "Will delete %d snapshots on %s" % (len(to_tag_retention[retention_days]), delete_fmt)
         ec.create_tags(
-            Resources=to_tag[retention_days],
+            Resources=to_tag_retention[retention_days],
             Tags=[
                 {'Key': 'DeleteOn', 'Value': delete_fmt},
             ]
         )
-        
