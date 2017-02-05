@@ -57,6 +57,10 @@ Next create an IAM role also called "ebs-backup-worker" selete "AWS Lambda" as t
 }
 ```
 
+## Edit the scripts to add appropriate regions for your environment.
+
+Edit the `regions` array.
+
 ## Create the Lambda Functions
 
 Create two functions in Lambda using the Python 2.7 runtime, one for the backup script and one for the cleanup script. I recommend just using the 128 MB memory setting, and adjust the timeout to 10 seconds (longer in a larger environment). Set the event source to be "CloudWatch Events - Schedule" and set the Schedule expression to be a cron expression of your liking i.e. "cron(0 6 * * ? *)" if you want the job to be kicked off at 06:00 UTC, set the cleanup job to run a few minutes later.
