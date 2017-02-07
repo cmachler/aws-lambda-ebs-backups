@@ -2,7 +2,7 @@ import boto3
 import re
 import datetime
 
-regions = ['us-west-2','us-east-2']
+regions = ['ap-northeast-1', 'us-west-2']
 
 iam = boto3.client('iam')
 
@@ -37,7 +37,7 @@ def lambda_handler(event, context):
         ]
         snapshot_response = ec.describe_snapshots(OwnerIds=account_ids, Filters=filters)
 
-
+        print "Going to delete snapshots in region %s on %s" % (region, delete_on)
         for snap in snapshot_response['Snapshots']:
             print "Deleting snapshot %s" % snap['SnapshotId']
             ec.delete_snapshot(SnapshotId=snap['SnapshotId'])
