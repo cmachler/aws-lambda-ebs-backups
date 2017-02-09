@@ -57,9 +57,27 @@ Next create an IAM role also called "ebs-backup-worker" selete "AWS Lambda" as t
 }
 ```
 
-## Edit the scripts to add appropriate regions for your environment.
+## Add the regions you want run the scripts against as a Python Base64 encoded string Lambda environment variable "aws_regions".
 
-Edit the `regions` list.
+Since Lambda does not allow commas in the environment variable values, we cannot enter in a list for our regions we want to run the script against. To work around this we will Base64 encode the list/string, and then decode the string in our script and then "split" the string into a list again.
+
+Below is an example of using Python to Base64 encode our string:
+
+```
+~$ python
+Python 2.7.12 (default, Nov 19 2016, 06:48:10)
+[GCC 5.4.0 20160609] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import base64
+>>> encoded = base64.b64encode(b'us-west-2,us-east-2')
+>>> encoded
+'dXMtd2VzdC0yLHVzLWVhc3QtMg=='
+>>> data = base64.b64decode(encoded)
+>>> data
+'us-west-2,us-east-2'
+>>>
+```
+**We will copy the encoded value and add it as the Lambda environment variable "aws_regions". When copying the encoded value please omit the single quotes in the output (ie. dXMtd2VzdC0yLHVzLWVhc3QtMg==).**
 
 ## Create the Lambda Functions
 
