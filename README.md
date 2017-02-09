@@ -59,7 +59,7 @@ Next create an IAM role also called "ebs-backup-worker" selete "AWS Lambda" as t
 
 ## Edit the scripts to add appropriate regions for your environment.
 
-Edit the `regions` array.
+Edit the `regions` list.
 
 ## Create the Lambda Functions
 
