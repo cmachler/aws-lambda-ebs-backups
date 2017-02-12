@@ -28,7 +28,7 @@ def lambda_handler(event, context):
                 for r in reservations
             ], [])
 
-        print "Found %d instances that need backing up" % len(instances)
+        print "Found %d instances that need backing up in region %s" % (len(instances), region)
 
         to_tag_retention = collections.defaultdict(list)
         to_tag_mount_point = collections.defaultdict(list)
