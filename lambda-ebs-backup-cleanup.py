@@ -1,8 +1,10 @@
 import boto3
 import re
 import datetime
+import base64
+import os
 
-regions = ['ap-northeast-1', 'us-west-2']
+base64_region = os.environ['aws_regions']
 
 iam = boto3.client('iam')
 
@@ -13,6 +15,11 @@ daily.
 """
 
 def lambda_handler(event, context):
+    decoded_regions = base64.b64decode(base64_region)
+    regions = decoded_regions.split(',')
+
+    print "Cleaning up snapshots in regions: %s" % regions
+
     for region in regions:
         ec = boto3.client('ec2', region_name=region)
         account_ids = list()
