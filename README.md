@@ -35,6 +35,13 @@ First create an IAM policy called "ebs-backup-worker" with the following policy 
             "Resource": [
                 "*"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sns:Publish"
+            ],
+            "Resource": "*"
         }
     ]
 }
@@ -78,6 +85,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>>
 ```
 **We will copy the encoded value and add it as the Lambda environment variable "aws_regions". When copying the encoded value please omit the single quotes in the output (ie. dXMtd2VzdC0yLHVzLWVhc3QtMg==).**
+
+## Add the SNS Topics ARN you want publish as a Lambda environmenet variable "aws_sns_arn"
+
+This is optional environment variable if you want publish any topic, so you might receive email notification
+once backing up was executed.
 
 ## Create the Lambda Functions
 
