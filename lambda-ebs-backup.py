@@ -3,8 +3,28 @@ import collections
 import datetime
 import base64
 import os
+import json
 
 base64_region = os.environ['aws_regions']
+aws_sns_arn = os.getenv('aws_sns_arn', None)
+
+def send_to_sns(subject, message):
+    if aws_sns_arn is None:
+        return
+
+    print "Sending notification to: %s" % aws_sns_arn
+
+    client = boto3.client('sns')
+
+    response = client.publish(
+        TargetArn=aws_sns_arn,
+        Message=message,
+        Subject=subject)
+
+    if 'MessageId' in response:
+        print "Notification sent with message id: %s" % response['MessageId']
+    else:
+        print "Sending notification failed with response: %s" % str(response)
 
 def lambda_handler(event, context):
     decoded_regions = base64.b64decode(base64_region)
@@ -28,7 +48,7 @@ def lambda_handler(event, context):
                 for r in reservations
             ], [])
 
-        print "Found %d instances that need backing up" % len(instances)
+        print "Found %d instances that need backing up in region %s" % (len(instances), region)
 
         to_tag_retention = collections.defaultdict(list)
         to_tag_mount_point = collections.defaultdict(list)
@@ -82,3 +102,6 @@ def lambda_handler(event, context):
                     {'Key': 'DeleteOn', 'Value': delete_fmt},
                 ]
             )
+
+        message = "{} instances have been backed up in region {}".format(len(instances), region)
+        send_to_sns('EBS Backups', message)
