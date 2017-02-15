@@ -44,6 +44,10 @@ def lambda_handler(event, context):
         ]
         snapshot_response = ec.describe_snapshots(OwnerIds=account_ids, Filters=filters)
 
+        print "Found %d snapshots that need deleting in region %s on %s" % (
+            len(snapshot_response['Snapshots']),
+            region,
+            delete_on)
 
         for snap in snapshot_response['Snapshots']:
             print "Deleting snapshot %s" % snap['SnapshotId']
