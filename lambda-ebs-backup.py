@@ -103,5 +103,5 @@ def lambda_handler(event, context):
                 ]
             )
 
-        message = "{} instances have been backing up in region {}".format(len(instances), region)
+        message = "{} instances have been backed up in region {}".format(len(instances), region)
         send_to_sns('EBS Backups', message)
