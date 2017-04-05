@@ -47,7 +47,7 @@ First create an IAM policy called "ebs-backup-worker" with the following policy 
 }
 ```
 
-Next create an IAM role also called "ebs-backup-worker" selete "AWS Lambda" as the Role type, then attach the "ebs-backup-worker" policy created above. When completed and you check the trust relationship in the role through "Edit Trust Relationship" it should look like below:
+Next create an IAM role also called "ebs-backup-worker" select "AWS Lambda" as the Role type, then attach the "ebs-backup-worker" policy created above. When completed and you check the trust relationship in the role through "Edit Trust Relationship" it should look like below:
 
 ```
 {
