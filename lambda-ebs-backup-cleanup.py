@@ -3,10 +3,29 @@ import re
 import datetime
 import base64
 import os
+import json
 
 base64_region = os.environ['aws_regions']
-
 iam = boto3.client('iam')
+aws_sns_arn = os.getenv('aws_sns_arn', None)
+
+def send_to_sns(subject, message):
+    if aws_sns_arn is None:
+        return
+
+    print "Sending notification to: %s" % aws_sns_arn
+
+    client = boto3.client('sns')
+
+    response = client.publish(
+        TargetArn=aws_sns_arn,
+        Message=message,
+        Subject=subject)
+
+    if 'MessageId' in response:
+        print "Notification sent with message id: %s" % response['MessageId']
+    else:
+        print "Sending notification failed with response: %s" % str(response)
 
 """
 This function looks at *all* snapshots that have a "DeleteOn" tag containing
@@ -52,3 +71,6 @@ def lambda_handler(event, context):
         for snap in snapshot_response['Snapshots']:
             print "Deleting snapshot %s" % snap['SnapshotId']
             ec.delete_snapshot(SnapshotId=snap['SnapshotId'])
+
+        message = "{} snapshots have been cleaned up in region {}".format(len(snapshot_response['Snapshots']), region)
+        send_to_sns('EBS Backups Cleanup', message)
