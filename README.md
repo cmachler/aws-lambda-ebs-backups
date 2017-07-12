@@ -86,7 +86,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ```
 **We will copy the encoded value and add it as the Lambda environment variable "aws_regions". When copying the encoded value please omit the single quotes in the output (ie. dXMtd2VzdC0yLHVzLWVhc3QtMg==).**
 
-## Add the SNS Topics ARN you want publish as a Lambda environmenet variable "aws_sns_arn"
+## Add the SNS Topics ARN you want publish as a Lambda environment variable "aws_sns_arn"
 
 This is optional environment variable if you want publish any topic, so you might receive email notification
 once backing up was executed.
@@ -94,6 +94,16 @@ once backing up was executed.
 ## Create the Lambda Functions
 
 Create two functions in Lambda using the Python 2.7 runtime, one for the backup script and one for the cleanup script. I recommend just using the 128 MB memory setting, and adjust the timeout to 10 seconds (longer in a larger environment). Set the event source to be "CloudWatch Events - Schedule" and set the Schedule expression to be a cron expression of your liking i.e. "cron(0 6 * * ? *)" if you want the job to be kicked off at 06:00 UTC, set the cleanup job to run a few minutes later.
+
+## Tagging your EC2 instances to backup
+
+You will need to tag your instances in order for them to be backed up, below are the tags that will be used by the Lambda function:
+
+| Tag Key           | Tag Value                           | Notes |
+| -------------     |:-------------:                      | -----:|
+| Backup            |                                     | Value Not Needed |
+| Retention         | *Number of Days to Retain Snapshot* |  Default is 7 Days|
+|Skip_Backup_Volumes|*volume id(s) in CSV string*         |    List either a single volume-id, or multiple volumes-ids in a Comma Separated Value String |
 
 ## More Info
 

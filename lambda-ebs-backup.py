@@ -4,6 +4,7 @@ import datetime
 import base64
 import os
 import json
+import itertools
 
 base64_region = os.environ['aws_regions']
 aws_sns_arn = os.getenv('aws_sns_arn', None)
@@ -61,10 +62,23 @@ def lambda_handler(event, context):
             except IndexError:
                 retention_days = 7
 
+            try:
+                skip_volumes = [
+                    str(t.get('Value')).split(',') for t in instance['Tags']
+                    if t['Key'] == 'Skip_Backup_Volumes']
+            except Exception:
+                pass
+
+            from itertools import chain
+            skip_volumes_list = list(chain.from_iterable(skip_volumes))
+
             for dev in instance['BlockDeviceMappings']:
                 if dev.get('Ebs', None) is None:
                     continue
                 vol_id = dev['Ebs']['VolumeId']
+                if vol_id in skip_volumes_list:
+                    print "Volume %s is set to be skipped, not backing up" % (vol_id)
+                    continue
                 dev_attachment = dev['DeviceName']
                 print "Found EBS volume %s on instance %s attached to %s" % (
                     vol_id, instance['InstanceId'], dev_attachment)
