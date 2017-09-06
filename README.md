@@ -27,6 +27,7 @@ First create an IAM policy called "ebs-backup-worker" with the following policy 
             "Effect": "Allow",
             "Action": [
                 "ec2:CreateSnapshot",
+                "ec2:CopySnapshot",
                 "ec2:DeleteSnapshot",
                 "ec2:CreateTags",
                 "ec2:ModifySnapshotAttribute",
