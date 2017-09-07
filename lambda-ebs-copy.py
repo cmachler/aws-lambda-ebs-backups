@@ -5,7 +5,9 @@ import base64
 import os
 import json
 
-retention_days = 7
+COPY_LIMIT = 5
+RETENTION_DAYS = 7
+CROSS_COPIED_TAG = 'CrossCopied'
 base64_region = os.environ['aws_regions']
 copy_region = os.environ['aws_copy_region']
 iam = boto3.client('iam')
@@ -49,6 +51,8 @@ def lambda_handler(event, context):
     print "Copying snapshots in region: %s" % copy_region
 
     dest_conn = boto3.client('ec2', region_name=copy_region)
+    # There is a COPY_LIMIT concurrent copy operations limit
+    copy_limit_counter = 0
     for region in regions:
         ec = boto3.client('ec2', region_name=region)
         account_ids = list()
@@ -66,7 +70,7 @@ def lambda_handler(event, context):
             account_ids.append(
                 re.search(r'(arn:aws:sts::)([0-9]+)', str(e)).groups()[1])
 
-        delete_on = datetime.date.today() + datetime.timedelta(days=retention_days)
+        delete_on = datetime.date.today() + datetime.timedelta(days=RETENTION_DAYS)
         filters = [
             {'Name': 'tag-key', 'Values': ['DeleteOn']},
             {'Name': 'tag-value', 'Values': [delete_on.strftime('%Y-%m-%d')]},
@@ -74,15 +78,16 @@ def lambda_handler(event, context):
         snapshot_response = ec.describe_snapshots(
             OwnerIds=account_ids, Filters=filters)
 
-        print "Found %d snapshots that need copying in region %s" % (
+        print "Analyzing %d snapshots for copying in region %s" % (
             len(snapshot_response['Snapshots']),
             region)
 
         for snap in snapshot_response['Snapshots']:
+            if copy_limit_counter == COPY_LIMIT:
+                return "{} copies limit reached".format(COPY_LIMIT)
+            if snapshot_is_copied(snap):
+                continue
             print "Copying snapshot %s" % snap['SnapshotId']
-            # FIXME copy_snapshot is NOT idempotent,
-            # if run more than once day this lambda
-            # will copy already copied snapshots.
             copied_snap = dest_conn.copy_snapshot(SourceRegion=region, SourceSnapshotId=snap['SnapshotId'],
                                                   Description='Cross copied from {} for {}'.format(
                                                       region, snap['Description'])
@@ -96,6 +101,16 @@ def lambda_handler(event, context):
                     },
                 ],
             )
+            ec.create_tags(
+                Resources=[snap['SnapshotId']],
+                Tags=[
+                    {
+                        'Key': CROSS_COPIED_TAG,
+                        'Value': copy_region,
+                    },
+                ],
+            )
+            copy_limit_counter += 1
 
         message = "started copying {} snapshots in region {}".format(
             len(snapshot_response['Snapshots']), region)
