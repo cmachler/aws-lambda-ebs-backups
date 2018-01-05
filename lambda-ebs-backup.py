@@ -83,9 +83,14 @@ def lambda_handler(event, context):
                 print "Found EBS volume %s on instance %s attached to %s" % (
                     vol_id, instance['InstanceId'], dev_attachment)
 
+                instance_name = ''
+                try:
+                    instance_name = [ x['Value'] for x in instance['Tags'] if x['Key'] == 'Name' ][0]
+                except IndexError:
+                    pass
                 snap = ec.create_snapshot(
                     VolumeId=vol_id,
-                    Description=instance['InstanceId'],
+                    Description='{} {}'.format(instance_name, instance['InstanceId'])
                 )
 
                 to_tag_retention[retention_days].append(snap['SnapshotId'])
