@@ -1,6 +1,10 @@
 # aws-lambda-ebs-backups
 Python scripts to be run using AWS's Lambda service to Create and Delete Snapshots of EBS Volumes
 
+# THIS REPOSITORY IS DEPRECIATED AND NOT ACTIVELY MAINTAINED.
+
+[I would recommend to start using Amazon Data Lifecycle Manager.](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html)
+
 [Read my blog post for more details on setting this up in Lambda if you have not used it before.] (http://www.evergreenitco.com/evergreenit-blog/2016/4/19/aws-ebs-backup-job-run-by-lambda)
 
 ## Setting Up IAM Permissions
